@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/smoring/2017-OK-Coders-Day-4#readme",
   "dependencies": {
+    "mongoose": "^4.9.4",
     "restify": "^4.3.0"
   }
 }
