@@ -1,4 +1,5 @@
 var restify = require('restify');
+var hello = require('./routes/hello');
 var server = restify.createServer();
 var port = 8088;
 var fs = require('fs');
@@ -6,25 +7,8 @@ var fs = require('fs');
 var mongoose = require ('mongoose');
 mongoose.connect('mongodb://localhost/enron');
 var db = mongoose.connection;
-var Schema = mongoose.Schema;
 
-var schema = new Schema({
-	_id: Schema.Types.ObjectId,
-	sender: String,
-	recipients: [],
-	cc: [],
-	text: String,
-	mid: String,
-	fpath: String,
-	bcc: [],
-	to: [],
-	replyto: Schema.Types.Mixed,
-	ctype: String,
-	fname: String,
-	date: Date,
-	subject: String
-});
-var Emails = mongoose.model('emails', schema);
+var Emails = require('./models/emails');
 
 
 db.on('error', function(msg){
@@ -40,15 +24,6 @@ function send(req, res, next){
 	return next;
 }
 
-function getEmails(req, res, next){
-	Emails.find().exec(function(err,data){
-		if(err){res.send('Error');}
-		else {
-			res.json(data);
-		}
-	});
-	return next();
-}
 
 server.get('/', function(req, res, next) {
 	fs.readFile('index.html', function(err,data){
@@ -69,18 +44,11 @@ server.get('/', function(req, res, next) {
 });
 
 server.get('/emails', getEmails);
-server.get('/hello/:name', send);
-server.put('/hello/:name', send);
-server.post('/hello/:name', function(req, res, next){
-	res.send(201, req.params.stuff + ";s random String is: " + 
-		Math.random().toString(36).substr(3,8));
-	return next();
-});
-server.del('/hello/:name', function(req, res, next){
-	res.send(req.params.name + " is now gone... deleted");
-	return next();
-})
-
+server.get('/hello/:name', hello.send);
+server.put('/hello/:name', hello.send);
+server.post('/hello/:name', hello.post);
+server.del('/hello/:name', hello.del);
+	
 server.listen(port, function(){
 	console.log('%s listening at %s', server.name, port);
 });
